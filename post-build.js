@@ -12,6 +12,7 @@ const assetsDir = path.join(clientDir, 'assets');
 // Find the main index-*.js file (the larger one)
 const files = fs.readdirSync(assetsDir);
 const indexFiles = files.filter(f => f.startsWith('index-') && f.endsWith('.js'));
+const cssFiles = files.filter(f => f.startsWith('styles-') && f.endsWith('.css'));
 
 if (indexFiles.length === 0) {
   console.error('No index-*.js file found!');
@@ -25,7 +26,10 @@ const mainBundle = indexFiles.reduce((prev, current) => {
   return currentSize > prevSize ? current : prev;
 });
 
+const cssFile = cssFiles.length > 0 ? cssFiles[0] : null;
+
 console.log('Found main bundle:', mainBundle);
+if (cssFile) console.log('Found CSS file:', cssFile);
 
 // Read and update index.html
 const indexPath = path.join(clientDir, 'index.html');
@@ -37,5 +41,13 @@ html = html.replace(
   `src="/assets/${mainBundle}"`
 );
 
+// Add CSS link if it exists and not already there
+if (cssFile && !html.includes(`/assets/${cssFile}`)) {
+  html = html.replace(
+    '</head>',
+    `    <link rel="stylesheet" href="/assets/${cssFile}" />\n  </head>`
+  );
+}
+
 fs.writeFileSync(indexPath, html);
-console.log('Updated index.html with correct bundle reference');
+console.log('Updated index.html with correct bundle and CSS references');
