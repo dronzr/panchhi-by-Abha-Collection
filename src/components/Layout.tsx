@@ -22,11 +22,7 @@ const SearchBox = memo(function SearchBox({
 }) {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
 
   const searchQuery = q.trim().toLowerCase();
 
@@ -60,7 +56,6 @@ const SearchBox = memo(function SearchBox({
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
       <input
-        ref={inputRef}
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search outfits..."
@@ -104,8 +99,10 @@ export const Header = memo(function Header() {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
-  const { count, wishlist } = useCart();
-  const { user, logout } = useAuth();
+  const count = 0;
+  const wishlist: any[] = [];
+  const user = null;
+  const logout = () => {};
   return (
     <header className="sticky top-0 z-50 glass border-b border-border/60">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
@@ -149,7 +146,7 @@ export const Header = memo(function Header() {
                       <>
                         <div className="px-3 py-2 text-xs">
                           <div className="text-muted-foreground">Signed in as</div>
-                          <div className="truncate font-medium">{user.name}</div>
+                          <div className="truncate font-medium">Guest User</div>
                         </div>
                         <div className="my-1 border-t border-border" />
                         <Link to="/account" onClick={() => setAcctOpen(false)} className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-secondary"><UserIcon className="h-4 w-4" /> My Account</Link>
