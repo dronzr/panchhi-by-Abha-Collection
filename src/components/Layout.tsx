@@ -1,8 +1,9 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { ShoppingBag, Heart, Menu, X, Phone, MapPin, Mail, Instagram, Facebook, Search, User as UserIcon, LogOut, Package } from "lucide-react";
-import { useState, useMemo, useEffect, useRef, type ReactNode, memo, useCallback } from "react";import { useCart } from "@/lib/cart";
+import { useState, useMemo, useEffect, useRef, type ReactNode, memo, useCallback } from "react";
+import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
-import { products } from "@/lib/products";
+import { products, searchProducts } from "@/lib/products";
 import logo from "@/assets/logo-bird.png";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,22 +22,20 @@ const SearchBox = memo(function SearchBox({
 }) {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const searchQuery = q.trim().toLowerCase();
 
-  const results = useMemo(() => {
+ const results = useMemo(() => {
   if (searchQuery.length < 2) return [];
 
-  return products
-    .filter((p) => {
-      return (
-        p.name.toLowerCase().includes(searchQuery) ||
-        p.category.toLowerCase().includes(searchQuery)
-      );
-    })
-    .slice(0, 4);
+  return searchProducts(searchQuery).slice(0, 4);
 }, [searchQuery]);
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -55,6 +54,7 @@ const SearchBox = memo(function SearchBox({
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
       <input
+        ref={inputRef}
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search outfits..."
@@ -62,39 +62,40 @@ const SearchBox = memo(function SearchBox({
       />
 
       {results.length > 0 && (
-  <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-border bg-white p-2 shadow-lg">
-    {results.map((r) => (
-      <div
-        key={r.id}
-        onClick={() => {
-          navigate({
-            to: "/product/$id",
-            params: { id: r.id },
-          });
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-border bg-white p-2 shadow-lg">
+          {results.map((r) => (
+            <div
+              key={r.id}
+              onClick={() => {
+                navigate({
+                  to: "/product/$id",
+                  params: { id: r.id },
+                });
 
-          onClose?.();
-        }}
-        className="flex cursor-pointer items-center gap-3 rounded-lg p-2 hover:bg-gray-100"
-      >
-        <img
-          src={r.image}
-          alt=""
-          className="h-12 w-10 rounded object-cover"
-        />
+                onClose?.();
+              }}
+              className="flex cursor-pointer items-center gap-3 rounded-lg p-2 hover:bg-gray-100"
+            >
+              <img
+                src={r.image}
+                alt=""
+                loading="lazy"
+                className="h-12 w-10 rounded object-cover"
+              />
 
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-medium">
-            {r.name}
-          </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium">
+                  {r.name}
+                </div>
 
-          <div className="text-[11px] text-gray-500">
-            ₹{r.price.toLocaleString("en-IN")}
-          </div>
+                <div className="text-[11px] text-gray-500">
+                  ₹{r.price.toLocaleString("en-IN")}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
-    ))}
-  </div>
-)}
+      )}
     </form>
   );
 });

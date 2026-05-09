@@ -6,6 +6,94 @@ import saree from "@/assets/p-saree.jpg";
 import office from "@/assets/p-office.jpg";
 import casual from "@/assets/p-casual.jpg";
 import wine from "@/assets/p-wine.jpg";
+export const getProduct = (id: string) => products.find(p => p.id === id);
+
+const SYNONYMS: Record<string, string[]> = {
+  red: ["maroon", "wine"],
+  burgundy: ["wine", "maroon"],
+  emerald: ["green"],
+  beige: ["cream"],
+  ivory: ["cream"],
+  blue: ["navy"],
+
+  women: [],
+  womens: [],
+  woman: [],
+  ladies: [],
+  girls: [],
+  female: [],
+
+  dress: ["gown", "lehenga", "anarkali", "saree", "kurta", "suit"],
+  dresses: ["gown", "lehenga", "anarkali", "saree", "kurta", "suit"],
+
+  outfit: ["gown", "lehenga", "saree"],
+
+  ethnic: [
+    "lehenga",
+    "saree",
+    "anarkali",
+    "indo-western",
+    "kurta",
+    "bridal",
+  ],
+
+  formal: ["office", "suit"],
+
+  wedding: ["bridal", "lehenga"],
+  bride: ["bridal"],
+  bridal: ["bridal", "lehenga"],
+
+  cocktail: ["party", "gown"],
+  evening: ["party", "gown"],
+
+  traditional: ["saree", "lehenga", "anarkali"],
+};
+
+export function searchProducts(
+  query: string,
+  list: Product[] = products
+): Product[] {
+  const q = query.toLowerCase().trim();
+
+  if (!q) return list;
+
+  const raw = q.split(/\s+/).filter(Boolean);
+
+  const tokens = new Set<string>();
+
+  raw.forEach((t) => {
+    tokens.add(t);
+
+    (SYNONYMS[t] ?? []).forEach((s) => tokens.add(s));
+
+    if (t.length > 3 && t.endsWith("s")) {
+      tokens.add(t.slice(0, -1));
+    }
+  });
+
+  const scored = list
+    .map((p) => {
+      const hay =
+        `${p.name} ${p.category} ${p.color} ${p.fabric} ${p.work} ${p.description}`.toLowerCase();
+
+      let score = 0;
+
+      if (hay.includes(q)) score += 10;
+
+      tokens.forEach((t) => {
+        if (t.length > 1 && hay.includes(t)) {
+          score += 2;
+        }
+      });
+
+      return { p, score };
+    })
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  return scored.map((x) => x.p);
+}
+
 
 export type Product = {
   id: string;
@@ -57,4 +145,3 @@ export const products: Product[] = [
   { id: "wine-velvet-gown", name: "Wine Velvet Gown", price: 13500, rentPrice: 3200, category: "Party Wear", color: "Wine", colorHex: "#5e1a2b", sizes: ["S","M","L","XL"], image: wine, rentable: true, description: "Liquid velvet gown in deep wine — a timeless red-carpet silhouette.", fabric: "Velvet", work: "Minimal" },
 ];
 
-export const getProduct = (id: string) => products.find(p => p.id === id);
