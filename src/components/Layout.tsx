@@ -25,8 +25,10 @@ const SearchBox = memo(function SearchBox({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+  if (onClose) {  // only auto-focus in mobile sheet, not desktop
     inputRef.current?.focus();
-  }, []);
+  }
+}, []);
 
   const searchQuery = q.trim().toLowerCase();
 
