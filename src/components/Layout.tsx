@@ -63,34 +63,39 @@ const SearchBox = memo(function SearchBox({
       />
 
       {results.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-border bg-popover p-2 shadow-soft">
-          {results.map((r) => (
-            <Link
-              key={r.id}
-              to="/product/$id"
-              params={{ id: r.id }}
-              onClick={onClose}
-              className="flex items-center gap-3 rounded-lg p-2 hover:bg-secondary"
-            >
-              <img
-                src={r.image}
-                alt=""
-                className="h-12 w-10 rounded object-cover"
-              />
+  <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-border bg-white p-2 shadow-lg">
+    {results.map((r) => (
+      <div
+        key={r.id}
+        onClick={() => {
+          navigate({
+            to: "/product/$id",
+            params: { id: r.id },
+          });
 
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium">
-                  {r.name}
-                </div>
+          onClose?.();
+        }}
+        className="flex cursor-pointer items-center gap-3 rounded-lg p-2 hover:bg-gray-100"
+      >
+        <img
+          src={r.image}
+          alt=""
+          className="h-12 w-10 rounded object-cover"
+        />
 
-                <div className="text-[11px] text-muted-foreground">
-                  ₹{r.price.toLocaleString("en-IN")}
-                </div>
-              </div>
-            </Link>
-          ))}
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium">
+            {r.name}
+          </div>
+
+          <div className="text-[11px] text-gray-500">
+            ₹{r.price.toLocaleString("en-IN")}
+          </div>
         </div>
-      )}
+      </div>
+    ))}
+  </div>
+)}
     </form>
   );
 });
