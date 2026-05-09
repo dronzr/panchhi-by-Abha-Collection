@@ -15,48 +15,87 @@ const nav = [
   { to: "/contact", label: "Contact" },
 ];
 
-const SearchBox = memo(function SearchBox({ onClose }: { onClose?: () => void }) {
+const SearchBox = memo(function SearchBox({
+  onClose,
+}: {
+  onClose?: () => void;
+}) {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { inputRef.current?.focus(); }, []);
-  const results = q.trim().length > 0 ? products.filter(p =>
-    p.name.toLowerCase().includes(q.toLowerCase()) ||
-    p.category.toLowerCase().includes(q.toLowerCase()) ||
-    p.color.toLowerCase().includes(q.toLowerCase()) ||
-    p.fabric.toLowerCase().includes(q.toLowerCase())
-  ).slice(0, 6) : [];
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const searchQuery = q.trim().toLowerCase();
+
+  const results =
+    searchQuery.length >= 2
+      ? products
+          .filter((p) => {
+            return (
+              p.name.toLowerCase().includes(searchQuery) ||
+              p.category.toLowerCase().includes(searchQuery)
+            );
+          })
+          .slice(0, 4)
+      : [];
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!q.trim()) return;
-    navigate({ to: "/collection", search: { q: q.trim() } as never });
+
+    if (!searchQuery) return;
+
+    navigate({
+      to: "/collection",
+      search: { q: searchQuery } as never,
+    });
+
     onClose?.();
   };
 
   return (
     <form onSubmit={submit} className="relative">
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)}
-        placeholder="Search lehenga, saree, gown, party wear…"
-        className="w-full rounded-full border border-input bg-background py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-      <AnimatePresence>
-        {results.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-auto rounded-2xl border border-border bg-popover p-2 shadow-luxury">
-            {results.map(r => (
-              <Link key={r.id} to="/product/$id" params={{ id: r.id }} onClick={onClose}
-                className="flex items-center gap-3 rounded-lg p-2 hover:bg-secondary">
-                <img src={r.image} alt="" className="h-12 w-10 rounded object-cover" />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{r.name}</div>
-                  <div className="text-[11px] text-muted-foreground">{r.category} · ₹{r.price.toLocaleString("en-IN")}</div>
+
+      <input
+        ref={inputRef}
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Search outfits..."
+        className="w-full rounded-full border border-input bg-background py-2.5 pl-10 pr-4 text-sm focus:outline-none"
+      />
+
+      {results.length > 0 && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-border bg-popover p-2 shadow-soft">
+          {results.map((r) => (
+            <Link
+              key={r.id}
+              to="/product/$id"
+              params={{ id: r.id }}
+              onClick={onClose}
+              className="flex items-center gap-3 rounded-lg p-2 hover:bg-secondary"
+            >
+              <img
+                src={r.image}
+                alt=""
+                className="h-12 w-10 rounded object-cover"
+              />
+
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium">
+                  {r.name}
                 </div>
-              </Link>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+                <div className="text-[11px] text-muted-foreground">
+                  ₹{r.price.toLocaleString("en-IN")}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </form>
   );
 });
