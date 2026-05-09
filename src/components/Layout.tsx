@@ -1,7 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { ShoppingBag, Heart, Menu, X, Phone, MapPin, Mail, Instagram, Facebook, Search, User as UserIcon, LogOut, Package } from "lucide-react";
-import { useState, useEffect, useRef, type ReactNode, memo, useCallback } from "react";
-import { useCart } from "@/lib/cart";
+import { useState, useMemo, useEffect, useRef, type ReactNode, memo, useCallback } from "react";import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { products } from "@/lib/products";
 import logo from "@/assets/logo-bird.png";
@@ -26,18 +25,18 @@ const SearchBox = memo(function SearchBox({
 
   const searchQuery = q.trim().toLowerCase();
 
-  const results =
-    searchQuery.length >= 2
-      ? products
-          .filter((p) => {
-            return (
-              p.name.toLowerCase().includes(searchQuery) ||
-              p.category.toLowerCase().includes(searchQuery)
-            );
-          })
-          .slice(0, 4)
-      : [];
+  const results = useMemo(() => {
+  if (searchQuery.length < 2) return [];
 
+  return products
+    .filter((p) => {
+      return (
+        p.name.toLowerCase().includes(searchQuery) ||
+        p.category.toLowerCase().includes(searchQuery)
+      );
+    })
+    .slice(0, 4);
+}, [searchQuery]);
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
