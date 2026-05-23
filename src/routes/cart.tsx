@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { PageShell } from "@/components/Layout";
 import { useCart, inr } from "@/lib/cart";
@@ -39,15 +38,12 @@ function CartPage() {
         ) : (
           <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
             <div className="space-y-4">
-              <AnimatePresence>
                 {items.map(it => {
                   const price = it.mode === "rent" ? (it.product.rentPrice ?? 0) : it.product.price;
                   return (
-                    <motion.div key={it.product.id + it.mode}
-                      layout
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}
+                    <div key={it.product.id + it.mode}
                       className="flex gap-4 rounded-2xl border border-border bg-card p-4">
-                      <img src={it.product.image} alt="" className="h-32 w-24 rounded-lg object-cover" />
+                      <img src={it.product.image} loading="lazy" alt="" className="h-32 w-24 rounded-lg object-cover" />
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
@@ -66,10 +62,9 @@ function CartPage() {
                           <div className="font-serif text-lg text-primary">{inr(price * it.qty)}</div>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
-              </AnimatePresence>
             </div>
 
             <aside className="h-fit rounded-2xl border border-border bg-card p-6 lg:sticky lg:top-24">

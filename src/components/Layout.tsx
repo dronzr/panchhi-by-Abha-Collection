@@ -1,9 +1,9 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { ShoppingBag, Heart, Menu, X, Phone, MapPin, Mail, Instagram, Facebook, Search, User as UserIcon, LogOut, Package } from "lucide-react";
-import { useState, useMemo, useEffect, useRef, type ReactNode, memo, useCallback } from "react";
+import { ShoppingBag, Heart, Menu, X, Phone, MapPin, Mail, Instagram, Facebook, User as UserIcon, LogOut, Package } from "lucide-react";
+import { useState, type ReactNode, memo } from "react";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
-import { products, searchProducts } from "@/lib/products";
+import { products } from "@/lib/products";
 import logo from "@/assets/logo-bird.png";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,96 +15,8 @@ const nav = [
   { to: "/contact", label: "Contact" },
 ];
 
-const SearchBox = memo(function SearchBox({
-  onClose,
-}: {
-  onClose?: () => void;
-}) {
-  const [q, setQ] = useState("");
-  const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-  if (onClose) {  // only auto-focus in mobile sheet, not desktop
-    inputRef.current?.focus();
-  }
-}, []);
-
-  const searchQuery = q.trim().toLowerCase();
-
- const results = useMemo(() => {
-  if (searchQuery.length < 2) return [];
-
-  return searchProducts(searchQuery).slice(0, 4);
-}, [searchQuery]);
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!searchQuery) return;
-
-    navigate({
-      to: "/collection",
-      search: { q: searchQuery } as never,
-    });
-
-    onClose?.();
-  };
-
-  return (
-    <form onSubmit={submit} className="relative">
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-      <input
-        ref={inputRef}
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Search outfits..."
-        className="w-full rounded-full border border-input bg-background py-2.5 pl-10 pr-4 text-sm focus:outline-none"
-      />
-
-      {results.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 rounded-2xl border border-border bg-white p-2 shadow-lg">
-          {results.map((r) => (
-            <div
-              key={r.id}
-              onClick={() => {
-                navigate({
-                  to: "/product/$id",
-                  params: { id: r.id },
-                });
-
-                onClose?.();
-              }}
-              className="flex cursor-pointer items-center gap-3 rounded-lg p-2 hover:bg-gray-100"
-            >
-              <img
-                src={r.image}
-                alt=""
-                loading="lazy"
-                className="h-12 w-10 rounded object-cover"
-              />
-
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium">
-                  {r.name}
-                </div>
-
-                <div className="text-[11px] text-gray-500">
-                  ₹{r.price.toLocaleString("en-IN")}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </form>
-  );
-});
-
 export const Header = memo(function Header() {
   const [open, setOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
   const count = 0;
   const wishlist: any[] = [];
@@ -130,16 +42,7 @@ export const Header = memo(function Header() {
           ))}
         </nav>
 
-        <div className="hidden flex-1 max-w-sm md:block">
-          <SearchBox />
-        </div>
-
         <div className="flex items-center gap-1">
-          <button onClick={() => setSearchOpen(true)} className="rounded-full p-2 hover:bg-secondary md:hidden" aria-label="Search">
-            <Search className="h-5 w-5" />
-          </button>
-
-          <div className="relative">
             <button onClick={() => setAcctOpen(o => !o)} className="rounded-full p-2 hover:bg-secondary" aria-label="Account">
               <UserIcon className="h-5 w-5" />
             </button>
@@ -171,36 +74,23 @@ export const Header = memo(function Header() {
                 </>
               )}
             </AnimatePresence>
+
+            <Link to="/wishlist" className="relative rounded-full p-2 hover:bg-secondary">
+              <Heart className="h-5 w-5" />
+              {wishlist.length > 0 && <motion.span key={wishlist.length} initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">{wishlist.length}</motion.span>}
+            </Link>
+            <Link to="/cart" className="relative rounded-full p-2 hover:bg-secondary">
+              <ShoppingBag className="h-5 w-5" />
+              {count > 0 && <motion.span key={count} initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">{count}</motion.span>}
+            </Link>
+            <Link to="/book" className="hidden rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-soft transition-transform hover:scale-105 lg:inline-flex">
+              Book
+            </Link>
+            <button className="rounded-full p-2 hover:bg-secondary lg:hidden" onClick={() => setOpen(o => !o)} aria-label="Menu">
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
-
-          <Link to="/wishlist" className="relative rounded-full p-2 hover:bg-secondary">
-            <Heart className="h-5 w-5" />
-            {wishlist.length > 0 && <motion.span key={wishlist.length} initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">{wishlist.length}</motion.span>}
-          </Link>
-          <Link to="/cart" className="relative rounded-full p-2 hover:bg-secondary">
-            <ShoppingBag className="h-5 w-5" />
-            {count > 0 && <motion.span key={count} initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">{count}</motion.span>}
-          </Link>
-          <Link to="/book" className="hidden rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-soft transition-transform hover:scale-105 lg:inline-flex">
-            Book
-          </Link>
-          <button className="rounded-full p-2 hover:bg-secondary lg:hidden" onClick={() => setOpen(o => !o)} aria-label="Menu">
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
-      </div>
-
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="border-t border-border bg-background p-3 md:hidden">
-            <div className="flex items-center gap-2">
-              <div className="flex-1"><SearchBox onClose={() => setSearchOpen(false)} /></div>
-              <button onClick={() => setSearchOpen(false)} className="rounded-full p-2"><X className="h-5 w-5" /></button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {open && (
